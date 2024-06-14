@@ -2,7 +2,6 @@ import argparse
 import os.path
 import time
 from collections import Counter, defaultdict
-# from operator import itemgetter
 import torch
 from torch.utils.data import random_split
 from src.datasets import CAT3SamplingDataset
@@ -16,15 +15,13 @@ import torch.nn.functional as F
 from src.config import *
 from sklearn.metrics import accuracy_score, confusion_matrix
 import json
-
 from codecarbon import track_emissions
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 N_CLASSES = 5
 VOTES = 3
-# KNN samples
-N_SAMPLES = 64
+N_SAMPLES = 64 # KNN samples
 global DATASET
 
 logging.info(f"Device: {device}")
@@ -174,25 +171,10 @@ def test(output_dir,
                 # one hot encoding
                 preds = torch.nn.functional.one_hot(preds.cpu(), num_classes=5).to(torch.int64)  # [points, classes]
 
-                # if v==2: # check if any of the classes different from 3 has < 5 points
-                #     # 1. Sum the one-hot encoded tensor to get the number of points per class
-                #     points_per_class = preds.sum(dim=0)
-                #
-                #     if (points_per_class < 5).any():
-                #         # 2. Identify classes with less than 10 points, excluding class 3
-                #         classes_to_replace = (points_per_class < 10) & (torch.arange(5) != 3)
-                #
-                #         # Create a mask for rows that belong to the classes to be replaced
-                #         rows_to_replace = preds[:, classes_to_replace].sum(dim=1) > 0
-                #
-                #         # 3. For rows belonging to classes with less than 10 points, set their encoding to class 3
-                #         preds[rows_to_replace] = 0  # Reset these rows
-                #         preds[rows_to_replace, 3] = 1  # Assign them to class 3
-
                 pc = pc.transpose(1, 2)
                 pc = pc.view(-1, dims)  # [points, dims]
 
-                # debug and plot
+                # plot
                 # if v == 2 and len(uncertain_ids) > 10:
                 #     preds_all = preds.cpu().numpy()
                 #     preds_1 = preds_all[:n_points]
@@ -204,7 +186,7 @@ def test(output_dir,
                 #                          path_plot=os.path.join(output_dir, 'uncertain', 'knn_8K_9s'),
                 #                          point_size=2)
 
-                # --- Update the preds_tile matrix ---
+                # Update the preds_tile matrix
                 preds_tile.scatter_add_(0, ids.unsqueeze(1).expand(-1, 5), preds)
                 ids_np = ids.numpy()
 
@@ -268,31 +250,12 @@ def test(output_dir,
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--output_dir', type=str,
-                        # default='/mnt/QPcotLIDev01/LiDAR/DL_predictions/COSTA',
-                        # default='/mnt/QPcotLIDev01/LiDAR/DL_predictions/B23-TEST',
-                        default='/home/m.caros/work/3DSemanticSegmentation/src/results/test_metrics/knn_test_results',
+                        default='src/results/test_metrics/knn_test_results',
                         help='output directory')
     parser.add_argument('--n_workers', type=int, default=0, help='number of workers for the dataloader')
     parser.add_argument('--n_points', type=int, default=8000, help='number of points per point cloud')
-    parser.add_argument('--model_checkpoint', type=str,
-                        # default='/home/m.caros/work/3DSemanticSegmentation/src/checkpoints/seg_12-19-23:31_baseline.pth',
-                        # default='/home/m.caros/work/3DSemanticSegmentation/src/checkpoints/seg_12-22-13:58_base4k_lrPN2.pth',
-                        default='/home/m.caros/work/3DSemanticSegmentation/src/checkpoints/rem_sens/seg_01-23-10:55_weighted.pth',
-                        # default='/home/m.caros/work/3DSemanticSegmentation/src/checkpoints/seg_12-29-10:17_base_LS.pth',
-                        # default='/home/m.caros/work/3DSemanticSegmentation/src/checkpoints/seg_01-08-09:45_col20AdW.pth',
-                        # default='/home/m.caros/work/3DSemanticSegmentation/src/checkpoints/seg_12-29-10:09_AdamW.pth',
-                        # default='/home/m.caros/work/3DSemanticSegmentation/src/checkpoints/seg_12-22-13:51_base4k.pth',
-                        help='models checkpoint path')
-    parser.add_argument('--in_path', type=str,
-                        default=['/mnt/QPcotLIDev01/LiDAR/DL_preproc/B23_Test-Model_100x100_f64'])
-                        # default='/mnt/QPcotLIDev01/LiDAR/DL_preproc/COSTA_100x100_s80_p8k/')
-                        # default=[
-                        #     '/mnt/QPcotLIDev01/LiDAR/DL_preproc/B23_Test-Model_100x100_f64',
-                            # '/mnt/QPcotLIDev01/LiDAR/DL_preproc/100x100_s80_p8k_id/test/EMP',
-                            # '/mnt/QPcotLIDev01/LiDAR/DL_preproc/100x100_s80_p8k_id/test/RIB',
-                            # '/mnt/QPcotLIDev01/LiDAR/DL_preproc/100x100_s80_p8k_id/test/B29',
-                        # ])
-    # default='/home/m.caros/work/3DSemanticSegmentation/train_test_files/100x100/test')
+    parser.add_argument('--model_checkpoint', type=str, help='models checkpoint path')
+    parser.add_argument('--in_path', type=str)
     args = parser.parse_args()
     logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s',
                         level=logging.DEBUG,
@@ -385,13 +348,6 @@ if __name__ == '__main__':
         print(f'confusion matrix: \n{cm}\n')
         with open(os.path.join(args.output_dir, 'confusion_matrix_' + dataset + '.txt'), 'w') as filehandle:
             json.dump(cm.tolist(), filehandle)
-
-        # histogram n_points_arr
-        # plt.figure(figsize=(15, 5))
-        # plt.hist(n_points_arr, bins=100, log=True)
-        # plt.title('Histogram of number of points per point cloud')
-        # plt.savefig(os.path.join(output_dir, 'hist_n_points_pc'+ tile +'.png'), bbox_inches='tight', dpi=100)
-        # plt.close()
 
         time_min = round((time.time() - start_time) / 60, 3)
         print("--- TOTAL TIME: %s min ---" % str(time_min))
