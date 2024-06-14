@@ -77,9 +77,6 @@ def parallel_proc(files_list, num_cpus):
     with tqdm(total=len(files_list)) as pbar:
         for _ in p.imap_unordered(split_pointcloud, files_list):
             pbar.update(1)  # Update progress bar for each completed task
-
-    # for _ in tqdm(p.imap_unordered(split_pointcloud, files_list, 1)):
-    #     pass
     p.close()
     p.join()
 
@@ -100,8 +97,7 @@ def split_pointcloud(f):
     :param f: file path
     """
 
-    f_name = f.split('/')[-1].split('.')[0]  # /mnt/Lidar_M/DEMO_Productes_LIDARCAT3/LAS_def/505679.las
-
+    f_name = f.split('/')[-1].split('.')[0] 
     data_f = laspy.read(f)
 
     # check file is not empty
@@ -241,18 +237,17 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--in_path')
-    parser.add_argument('--out_path', type=str,
-                        help='output directory where processed files are stored')
+    parser.add_argument('--out_path', type=str)
     parser.add_argument('--n_points', type=int, default=8000)
-    parser.add_argument('--w_size', type=int, default=20)
-    parser.add_argument('--stride', default=10)
+    parser.add_argument('--w_size', type=int, default=100)
+    parser.add_argument('--stride', default=50)
     parser.add_argument('--max_z', type=float, default=200.0)
     parser.add_argument('--max_intensity', type=float, default=5000.0)
 
     args = parser.parse_args()
     start_time = time.time()
 
-    DATASET_NAME = 'COSTA'
+    DATASET_NAME = 'EMP'
     STORE_DOUBLE = True
 
     OUT_PATH = args.out_path
@@ -282,6 +277,7 @@ if __name__ == '__main__':
 
     # Multiprocessing
     parallel_proc(files, num_cpus=NUM_CPUS)
+    # Uncomment to avoid multiprocessing
     # for file in tqdm(files):
     #     split_pointcloud(file)
 
