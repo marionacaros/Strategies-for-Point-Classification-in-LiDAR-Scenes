@@ -2,7 +2,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from src.models.pointnet2_utils import PointNetSetAbstraction, PointNetFeaturePropagation
 
-EMBED_DIM = 512  # 100 semDeDup
+EMBED_DIM = 512 
 
 
 class PointNetAbstractionEncoder(nn.Module):
