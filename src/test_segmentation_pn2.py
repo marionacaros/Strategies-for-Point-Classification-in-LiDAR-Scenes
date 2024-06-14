@@ -129,35 +129,6 @@ def test(output_dir,
                 preds_tensor_gpu = torch.empty(0, dtype=torch.long, device=device)
                 torch.cuda.empty_cache()
 
-            # # compute IoUs
-            # iou = {
-            #     'building': get_iou_obj(targets_pc, preds_pc, 4),
-            # }
-            # iou_build = round(float(iou['building']), 3)
-            # # plot results if condition
-            # targets = targets.view(-1).numpy()
-            # preds = preds.numpy()
-
-            # points = pointcloud.contiguous().view(-1, dims).numpy()
-            # points = points[:len(targets), :]
-
-            # pc = pc.transpose(2, 1)
-            # pc = pc.view(-1, dims).numpy()
-            #
-            # # concat real z
-            # z = z.squeeze(0).numpy()
-            # points = np.concatenate((pc[:, :2], z), axis=1)
-            # points = points[:, :3]
-            # plot_pointcloud_with_labels(points,
-            #                             preds,
-            #                             targets,
-            #                             str(iou_build) + '_' + file_name + '_100x100',
-            #                             path_plot=os.path.join(output_dir),
-            #                             point_size=2)
-
-    # print(f'counter buildings: {counter_build_pc}')
-    # print(f'counter towers in buildings: {counter_tow}')
-
     # At the end of the loop, move any remaining tensors on GPU to CPU
     preds_tensor_cpu = torch.cat((preds_tensor_cpu, preds_tensor_gpu.cpu()), dim=0)
 
@@ -193,9 +164,7 @@ def test(output_dir,
     print('mean_iou_tower: ', round(float(np.nanmean(iou['tower'])), 3))
     print('mean_iou_lines: ', round(float(np.nanmean(iou['lines'])), 3))
     print('mean_iou_veg: ', round(float(np.nanmean(iou['veg'])), 3))
-    # print('mean_iou_building: ', round(float(np.nanmean(iou['building'])), 3))
     print('mean_iou_wind_turbine: ', xstr(np.nanmean(iou['wind_turbine'])))
-
     print('mean_iou: ', round(float(mean_iou), 3))
     print('accuracy: ', round(float(accuracy), 3))
     print(f'Model trained for {epochs} epochs')
@@ -217,16 +186,14 @@ def test(output_dir,
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--output_dir', type=str,
-                        default='src/results/test_metrics',
+    parser.add_argument('--output_dir', type=str, default='src/results/test_metrics',
                         help='output directory')
     parser.add_argument('--n_workers', type=int, default=0, help='number of workers for the dataloader')
     parser.add_argument('--n_points', type=int, default=4000, help='number of points to sample from original point cloud')
     parser.add_argument('--model_checkpoint', type=str,
-                        default='/home/m.caros/work/3DSemanticSegmentation/src/checkpoints/seg_01-23-10:55_weighted.pth',
+                        default='src/checkpoints/seg_01-23-10:55_weighted.pth',
                         help='models checkpoint path')
-    parser.add_argument('--path_list_files', type=str,
-                        default='/home/m.caros/work/3DSemanticSegmentation/train_test_files/100x100/test')
+    parser.add_argument('--path_list_files', type=str)
     args = parser.parse_args()
     logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s',
                         level=logging.DEBUG,
