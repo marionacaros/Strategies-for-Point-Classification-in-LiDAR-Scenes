@@ -175,20 +175,16 @@ def test(output_dir,
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    # parser.add_argument('--dataset_path', type=str, help='path to the dataset folder',
-    #                     default='/dades/LIDAR/towers_detection/datasets/pc_120x120_4096p_B29_windturbines/test_all_points')
     parser.add_argument('--output_dir', type=str,
                         default='src/results/preds_voting_pn2_01-23-10',
                         help='output directory')
     parser.add_argument('--n_workers', type=int, default=0, help='number of workers for the dataloader')
     parser.add_argument('--model_checkpoint', type=str,
-                        default='/home/m.caros/work/3DSemanticSegmentation/src/checkpoints/seg_01-23-10:55_weighted.pth',
+                        default='src/checkpoints/seg_01-23-10:55_weighted.pth',
                         help='models checkpoint path')
     parser.add_argument('--path_list_files', type=str,
-                        default='/home/m.caros/work/3DSemanticSegmentation/train_test_files/100x100/test')
+                        default='train_test_files/100x100/test')
     parser.add_argument('--in_path', type=str,
-                        # default=['/mnt/QPcotLIDev01/LiDAR/DL_preproc/B23_Test-Model_100x100_f64'])
-                        # default='/mnt/QPcotLIDev01/LiDAR/DL_preproc/COSTA_100x100_s80_p8k/')
                         default=[
                             '/mnt/QPcotLIDev01/LiDAR/DL_preproc/100x100_s80_p8k_id/test/EMP',
                             '/mnt/QPcotLIDev01/LiDAR/DL_preproc/100x100_s80_p8k_id/test/RIB',
