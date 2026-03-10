@@ -25,7 +25,7 @@ Automating point cloud scene segmentation encounters notable challenges due to v
 
 ---
 ## 📖 Key Research Contributions
-* **mIoU of 94.24%:** Our methodology yields significant performance improvements over preceding methodologies on our self-captured dataset, such as TerLiDAR
+* **mIoU of 94.24%:** Our methodology yields significant performance improvements over preceding methodologies on our self-captured datasets, such as [TerLiDAR](https://github.com/marionacaros/terlidar)
 * **Architecture-Independent Gains:** We demonstrate that training and inference strategies alone are critical for obtaining best results.
 * **Uncertainty-Based Inference:** A novel strategy using prediction entropy to improve minority class performance by **+2.9% IoU** while remaining **10x faster** than standard voting strategies.
 * **Scalable Pipeline:** Efficiently handles point cloud sizes ranging from $10^3$ to $4\times10^5$ points.
@@ -42,7 +42,7 @@ The following results were achieved using PointNet++ with our **Uncertainty-Base
 | **Global mIoU** | **94.24%** |
 
 ### Robustness on Out-of-Domain (OOD) Data
-[cite_start]Our model maintains a high **94.33% mIoU** when tested on unfamiliar geographical locations (4 tiles of $1\times1$ km), demonstrating excellent generalization capacity[cite: 489, 994].
+Our model maintains a high **94.33% mIoU** when tested on unfamiliar geographical locations (4 tiles of $1\times1$ km), demonstrating excellent generalization capacity.
 
 ---
 
@@ -60,8 +60,7 @@ Evaluation of the model's generalization capabilities on unseen scenes.
 
 ## 📦 Model Weights
 The best-performing weights are provided in the repository:
-* [cite_start]**Path:** `src/checkpoints/seg_01-23-10:55_weighted.pth` [cite: 997]
-* **Format:** PyTorch `.pth`
+* **Path:** `src/checkpoints/seg_01-23-10:55_weighted.pth`
 
 > [!TIP]
 > Use these weights for out-of-the-box inference on TerLiDAR classes or as a backbone for further fine-tuning.
