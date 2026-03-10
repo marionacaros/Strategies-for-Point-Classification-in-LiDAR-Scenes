@@ -30,7 +30,7 @@ Automating point cloud scene segmentation encounters notable challenges due to v
 * **Uncertainty-Based Inference:** A novel strategy using prediction entropy to improve minority class performance by **+2.9% IoU** while remaining **10x faster** than standard voting strategies.
 * **Scalable Pipeline:** Efficiently handles point cloud sizes ranging from $10^3$ to $4\times10^5$ points.
 
-### [cite_start]Per-Class Accuracy [cite: 742]
+### Per-Class Metrics
 The following results were achieved using PointNet++ with our **Uncertainty-Based Inference** strategy:
 
 | Class | IoU (%) |
