@@ -13,4 +13,6 @@ Light Detection and Ranging systems serve as robust tools for creating three-dim
 ![plot](figs/preds_terra_alta.png)
 ![plot](figs/preds_OOD.png)
 
+### Trained PointNet++ Weights
+best weights are found: src/checkpoints/seg_01-23-10:55_weighted.pth
 
