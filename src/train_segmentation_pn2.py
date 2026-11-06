@@ -1,4 +1,7 @@
 """Train PointNet++ on the preprocessed .pt windows (random 80/20 train/val split)."""
+# torch is imported first: in some conda envs loading MKL through numpy first fails
+import torch  # noqa: I001
+
 import argparse
 import datetime
 import glob
@@ -8,7 +11,6 @@ import random
 import time
 
 import numpy as np
-import torch
 import torch.optim as optim
 from progressbar import progressbar
 from torch.utils.tensorboard import SummaryWriter

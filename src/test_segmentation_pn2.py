@@ -1,4 +1,7 @@
 """Single-pass inference: every point of each window is predicted once."""
+# torch is imported first: in some conda envs loading MKL through numpy first fails
+import torch  # noqa: I001
+
 import argparse
 import json
 import logging
@@ -6,7 +9,6 @@ import os
 import time
 
 import numpy as np
-import torch
 from progressbar import progressbar
 from sklearn.metrics import confusion_matrix
 

@@ -6,6 +6,9 @@ different random grouping; points whose votes disagree among the non-ground clas
 predicted once more on N_SAMPLES clouds drawn around them with utils.knn_exp_prob. Votes are accumulated per
 tile, indexed by point ID, so that overlapping windows are merged. IoUs are reported per --in_path directory.
 """
+# torch is imported first: in some conda envs loading MKL through numpy first fails
+import torch  # noqa: I001
+
 import argparse
 import glob
 import json
@@ -14,7 +17,6 @@ import os
 import time
 
 import numpy as np
-import torch
 from progressbar import progressbar
 from sklearn.metrics import confusion_matrix
 

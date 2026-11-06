@@ -3,3 +3,5 @@ __pycache__/
 # training / inference outputs written by the scripts
 src/runs/
 src/results/
+CLAUDE.md
+TASKS.md

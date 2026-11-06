@@ -2,13 +2,15 @@
 Voting inference: every window is predicted VOTES times with different random groupings of its points.
 Writes one CSV per window (preds-<window>.csv) with the label and the VOTES predictions of each point.
 """
+# torch is imported first: in some conda envs loading MKL through numpy first fails
+import torch  # noqa: I001
+
 import argparse
 import glob
 import logging
 import os
 import time
 
-import torch
 from progressbar import progressbar
 
 from src.config import N_CLASSES
