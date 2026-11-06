@@ -1,6 +1,11 @@
-from sklearn.metrics import balanced_accuracy_score
-import torch
+import os
+
 import numpy as np
+import torch
+
+# Classes that are evaluated. Ground (label 0) is not a target class: it is neither scored nor part of the mIoU.
+EVAL_CLASSES = {1: 'tower', 2: 'lines', 3: 'surrounding', 4: 'wind_turbine'}
+RESULTS_HEADER = 'dataset,n_points,' + ','.join(f'IoU_{name}' for name in EVAL_CLASSES.values()) + ',mIoU,time_min\n'
 
 
 def get_iou_obj(pc_preds: torch.LongTensor, targets: torch.LongTensor, label: int = 1):
@@ -20,7 +25,13 @@ def get_iou_obj(pc_preds: torch.LongTensor, targets: torch.LongTensor, label: in
 
 
 def get_iou_np(pc_preds, targets, label = 1):
-    # get IoU
+    """
+    IoU of one class (numpy).
+
+    NOTE: an IoU of exactly 0 is returned as NaN (kept on purpose to reproduce the paper's numbers),
+    so a class that is completely missed is skipped by np.nanmean instead of lowering the mIoU.
+    NaN is also returned when the class is absent from both targets and predictions.
+    """
     corrects = pc_preds == targets
     gt_positive = np.sum(targets == label)
     detected_positive = np.count_nonzero(pc_preds == label)
@@ -39,21 +50,34 @@ def get_iou_np(pc_preds, targets, label = 1):
     return iou_obj
 
 
+def get_ious(targets, preds):
+    """IoU of each evaluated class plus their mean ('mIoU'), as fractions (numpy arrays of labels)."""
+    iou = {name: get_iou_np(preds, targets, label) for label, name in EVAL_CLASSES.items()}
+    iou['mIoU'] = np.nanmean(list(iou.values()))
+    return iou
+
+
+def print_ious(iou):
+    for name, value in iou.items():
+        print(f'IoU {name}: {value * 100:.2f}')
+
+
+def append_results_csv(path, dataset, n_points, iou, time_min):
+    """Append one row (IoUs in %) to the results CSV, writing the header if the file is new."""
+    write_header = not os.path.exists(path)
+    values = [f'{iou[name] * 100:.2f}' for name in list(EVAL_CLASSES.values()) + ['mIoU']]
+    with open(path, 'a') as fid:
+        if write_header:
+            fid.write(RESULTS_HEADER)
+        fid.write(','.join([dataset, str(n_points)] + values + [str(time_min)]) + '\n')
+
+
 def get_accuracy(preds, targets, metrics):
     corrects = torch.eq(preds.view(-1), targets.view(-1))
     if len(corrects) != 0:
         metrics['accuracy'] = (corrects.sum().item() / len(corrects))
     else:
         metrics['accuracy'] = 0
-    return metrics
-
-
-def get_weighted_accuracy(preds, targets, metrics, c_weights):
-
-    sample_weights = get_weights4sample(c_weights, targets.view(-1))
-    accuracy_w = balanced_accuracy_score(targets, preds, sample_weight=sample_weights)
-    metrics['accuracy_w'] = accuracy_w
-
     return metrics
 
 
@@ -100,24 +124,3 @@ def get_weights4class(weighing_method, n_classes, samples_per_cls, beta=None):
 
     weights4class = torch.tensor(weights4class).float()
     return weights4class
-
-
-def get_weights4sample(weights4class, labels):
-    """
-    :param weights4class: Torch Tensor of size [n_classes]
-    :param labels: Torch Long Tensor of size [batch * n points]
-
-    :return:
-    """
-    # one-hot encoding
-    labels = labels.to('cpu').numpy()  # labels defines columns of non-zero elements
-    one_hot = np.zeros((labels.size, 2))  # [batch, 2]
-    rows = np.arange(labels.size)
-    one_hot[rows, labels] = 1
-
-    weights4samples = weights4class.to('cpu').unsqueeze(0)
-    weights4samples = weights4samples.repeat(labels.shape[0], 1)
-    weights4samples = torch.tensor(np.array(weights4samples * one_hot))
-    weights4samples = weights4samples.sum(1).cpu()
-
-    return weights4samples

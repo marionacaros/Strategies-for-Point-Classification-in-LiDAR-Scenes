@@ -1,0 +1,5 @@
+__pycache__/
+.pytest_cache/
+# training / inference outputs written by the scripts
+src/runs/
+src/results/

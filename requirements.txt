@@ -1,0 +1,11 @@
+# Tested with Python 3.10 and the versions below
+torch>=2.0          # tested 2.5.1
+numpy>=1.24,<2      # tested 1.26.4
+scikit-learn>=1.2   # tested 1.7.2
+laspy>=2.4          # tested 2.5.4
+prettytable>=3.0    # tested 3.10.0
+progressbar2>=4.0   # tested 4.2.0
+tqdm>=4.60          # tested 4.65.2
+tensorboard>=2.10   # tested 2.17.0
+matplotlib>=3.5     # tested 3.10.7 (utils/utils_plot.py)
+pytest>=7           # smoke tests in tests/
