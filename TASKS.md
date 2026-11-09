@@ -6,7 +6,6 @@ Status after the fix pass on 2026-11-06 (conda env `pytorch10`: Python 3.10, tor
 
 - [ ] **Class weights of the "weighted" model.** `seg_01-23-10:55_weighted.pth` stores the weights `[0.1718, 0.2430, 0.2430, 0.0992, 0.2430]`, but the per-class point counts and method that produced them are lost. The paper doesn't give them either. For now, training takes them directly with `--class_weights 0.1718 0.2430 0.2430 0.0992 0.2430`. If you want `WEIGHING_METHOD` to work, fill in `SAMPLES_X_CLASS_CAT3` in `src/config.py`.
 - [ ] **Reproduce the paper numbers on the full test sets (needs a GPU).** Run `src/knn_test_segmentation.py` on the Alt Empordà, Ribera del Ter and Terra Alta test windows and compare with the README / paper (mIoU 94.24%). The reconstructed `src/datasets.py` has only been checked on a B23 subset, see "Verification" below. The old test-set paths (`/mnt/QPcotLIDev01/LiDAR/DL_preproc/100x100_s80_p8k_id/test/{EMP,RIB,B29}`) are not reachable from this machine.
-- [ ] **`utils/utils_plot.py`** was copied from another project and nothing imports it any more. Delete it (it is untracked, so it was left for you to remove).
 - [ ] **NDVI range.** The paper says "features are normalized in [0, 1]", but NDVI is fed in its raw [-1, 1] range, which is what the checkpoint expects. Only the paper text could be updated here; the code should stay as it is.
 
 ## Decisions taken (documented in code and CLAUDE.md)
@@ -55,7 +54,7 @@ Cleanup
 Code cleanup (2026-11-06, second pass)
 - [x] Ground removed from all reported metrics: results CSVs, printed IoUs and TensorBoard. CSV columns are now `dataset,n_points,IoU_tower,IoU_lines,IoU_surrounding,IoU_wind_turbine,mIoU,time_min` (IoUs in %); the always-empty `accuracy` column was dropped.
 - [x] Shared helpers instead of copy-pasted code: `utils.utils.load_model`, `utils.get_metrics.get_ious` / `print_ious` / `append_results_csv`.
-- [x] Unused code removed: 26 functions in `utils/utils.py` (LAS/pickle normalisation, augmentations, `fps`, `tensor2las`, `DynamicLabelSmoothingCrossEntropy`, ...), `get_weighted_accuracy` / `get_weights4sample`, `inplace_relu` (a no-op: the model has no `nn.ReLU` modules), `PointNetSetAbstractionMsg`, `random_sample`, `sample_and_group_all` and the `group_all` / Barlow branches of the model, `get_loss`, the old PointNet baseline `src/models/pointnet.py`, the dataset options `task`, `fixed_num_points` and `return_coord`, and commented-out code. The model's `state_dict` is unchanged, so all checkpoints still load.
+- [x] Unused code removed: 26 functions in `utils/utils.py` (LAS/pickle normalisation, augmentations, `fps`, `tensor2las`, `DynamicLabelSmoothingCrossEntropy`, ...), `get_weighted_accuracy` / `get_weights4sample`, `inplace_relu` (a no-op: the model has no `nn.ReLU` modules), `PointNetSetAbstractionMsg`, `random_sample`, `sample_and_group_all` and the `group_all` / Barlow branches of the model, `get_loss`, the old PointNet baseline `src/models/pointnet.py`, `utils/utils_plot.py` (from another project), the dataset options `task`, `fixed_num_points` and `return_coord`, and commented-out code. The model's `state_dict` is unchanged, so all checkpoints still load.
 - [x] Star imports (`from utils.utils import *`, ...) replaced by explicit imports; `prettytable` is no longer a dependency. Every entry point imports torch first (MKL issue).
 - TensorBoard tags renamed: `_iou_veg` → `_iou_surrounding`, `_iou_windturbine` → `_iou_wind_turbine`; `_iou_ground` removed.
 
@@ -71,4 +70,5 @@ Code cleanup (2026-11-06, second pass)
   - `test_segmentation_voting_rdm_sampling_pn2.py` (13 votes, 3 windows) wrote one CSV row per unique point (101,336 rows = 101,336 points).
   - `train_segmentation_pn2.py` ran 1 epoch on 24/6 windows and saved its checkpoint and TensorBoard logs. These were deleted afterwards.
   - `proc_no_ground.py` CLI: works with `fork` and `spawn`.
+- After the cleanup pass, rerun on the same 30 windows: KNN tower 90.2 / surrounding 95.7 / mIoU 93.0; single pass 87.5 / 95.2 / 91.3. These are the same as above within random-sampling noise. Voting and 1 training epoch also run.
 - Lines show as `nan` on this subset: there are only 30 line points, all predicted as tower, so the IoU is 0 and becomes NaN (the intended `get_iou_np` behaviour).
